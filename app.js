@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 const port = process.env.PORT || 9000;
 
 app.get('/', async(req,res) => {
-    res.send("hello world")
+    res.json({"message":"hello world"})
 })
 app.get('/getAllUsers', async(req,res) => {
     try{        
