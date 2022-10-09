@@ -2,7 +2,7 @@ require("dotenv").config();
 const { MongoClient } = require("mongodb");
 
 let dbConnection;
-var collectionObj;
+// var collectionObj;
 
 const user = encodeURIComponent(process.env.user);
 const pw = encodeURIComponent(process.env.pw);
@@ -21,7 +21,7 @@ async function run() {
     console.log('Successfully connected to MongoDB Atlas!');
     dbConnection = client.db(db);
 } finally {
-      collectionObj = dbConnection.collection(collection)
+    //   collectionObj = dbConnection.collection(collection)
   }
 }
 run().catch(console.dir);
