@@ -1,6 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 
+// const dbConnect = require('./src/connection/connection');
 const dbConnect = require('./src/connection/connection');
 
 const app = express();
@@ -12,46 +13,42 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const port = process.env.PORT || 9000;
-
+dbConnect.connect();
 app.get('/', async(req,res) => {
     res.json({"message":"hello world"})
 })
 app.get('/getAllUsers', async(req,res) => {
     try{        
-        let collection = dbConnect.getConnection();
-        collection
-            .find({}).toArray(function (err, result) {
-                if (err) {
-                  res.status(400).send("Error fetching listings!");
-               } else {
-                  res.json(result);
-                }
-              });
+        let collection = await dbConnect.getCollection();
+        const result = await collection
+            .find({}).toArray();
+
+        res.status(200).json(result)
 
     }catch(err){
         res.status(500).send('Error ' + err)
     }
 })
 
-app.post('/', async(req,res) => {
+app.post('/register', async(req,res) => {
     console.log(req.body)
-    let collection = dbConnect.getConnection();
+    let collection = await dbConnect.getCollection();
     const user = {
         name: req.body.name,
         dob: req.body.phone,
         email: req.body.email,
-        phone: req.body.email,
-        city: req.body.email,
-        institute: req.body.email,
-        qualification: req.body.email,
-        gender: req.body.email
+        phone: req.body.phone,
+        city: req.body.city,
+        institute: req.body.institute,
+        qualification: req.body.qualification,
+        gender: req.body.gender
     }
 
     try{
         const a1 =  await collection.insertOne(user) 
-        res.json(a1)
+        res.status(201).json(user)
     }catch(err){
-        res.send('Error'+ err)
+        res.status(500).send('Error'+ err)
     }
 })
 app.listen(port, () => {
