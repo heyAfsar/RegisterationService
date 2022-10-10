@@ -1,5 +1,7 @@
 const express = require('express');
 require('dotenv').config();
+const cors = require('cors');
+
 
 const {connectToDatabase, getCollection, closeConnection} = require("./src/connection/connectToDataBase");
 
@@ -11,6 +13,10 @@ app.use(express.json());
 
 // For parsing application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cors({
+    origin: '*'
+}));
 
 const port = process.env.PORT || 9000;
 connectToDatabase();
