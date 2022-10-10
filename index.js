@@ -1,8 +1,8 @@
 const express = require('express');
 require('dotenv').config();
 
-// const dbConnect = require('./src/connection/connection');
-const dbConnect = require('./src/connection/connection');
+const {connectToDatabase, getCollection, closeConnection} = require("./src/connection/connectToDataBase");
+
 
 const app = express();
 
@@ -13,27 +13,49 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const port = process.env.PORT || 9000;
-dbConnect.connect();
+connectToDatabase();
+
+
+
 app.get('/', async(req,res) => {
     res.json({"message":"hello world"})
 })
+app.get('/close', async(req,res) => {
+    try {
+        var response = await closeConnection();
+        res.status(200).send(response)
+    } catch (error) {
+        res.status(500).send('Error:'+ error);
+    }
+    
+})
+app.get('/connect', async(req,res) => {
+    try{                
+        connectToDatabase();
+        res.status(200).send('Connected to Database')
+
+    }catch(err){
+        res.status(500).send('Error ' + err )
+    }
+})
+
 app.get('/getAllUsers', async(req,res) => {
-    try{        
-        let collection = await dbConnect.getCollection();
-        const result = await collection
-            .find({}).toArray();
+    try{
+        const collection = await getCollection();
+        const result = await collection.find({})
+                .toArray();
 
         res.status(200).json(result)
 
     }catch(err){
-        res.status(500).send('Error ' + err)
+        res.status(500).send('Error ' + err+ "\n Try Reconnecting to the Database")
     }
 })
 
 app.post('/register', async(req,res) => {
     console.log(req.body)
-    let collection = await dbConnect.getCollection();
-    const user = {
+    const collection = await getCollection();
+    let user = {
         name: req.body.name,
         dob: req.body.phone,
         email: req.body.email,
@@ -45,7 +67,7 @@ app.post('/register', async(req,res) => {
     }
 
     try{
-        const a1 =  await collection.insertOne(user) 
+        await collection.insertOne(user);
         res.status(201).json(user)
     }catch(err){
         res.status(500).send('Error'+ err)
